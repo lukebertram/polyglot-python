@@ -25,7 +25,12 @@ class QuoteList(Resource):
 
 class Quote(Resource):
     def get(self, quote_id):
-        quotes = mongo.db.quotes.find_one({"index": int(quote_id)})
+        quote_query = quote_id
+        if quote_id == "random":
+            quotes = mongo.db.quotes.find().sort("index", -1).limit(1)
+            max_number = int(quotes[0]["index"])
+            quote_query = randint(0, max_number)
+        quotes = mongo.db.quotes.find_one({"index": int(quote_query)})
         resp = Response(dumps(quotes, default=default, indent=2),
                         mimetype='application/json')
         return resp
