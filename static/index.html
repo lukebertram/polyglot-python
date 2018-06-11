@@ -23,7 +23,7 @@
 			$('#random-quote').show();
 		});
 	}
-		
+
 
 	// Get all quotes
 	function showAllQuotes() {
@@ -71,7 +71,10 @@
 
 	function addQuote() {
 		author = $("#main-add #author").val();
+		$("#main-add #author").val('');
 		content = $("#main-add #content").val();
+		$("#main-add #content").val('');
+
 		$.ajax({
 			type: "POST",
 			url: base_url,
@@ -167,7 +170,7 @@
 						<button class='btn btn-primary button-edit' type='button' data-id='$id' onclick='showEditQuote($id, "$content", "$author")'>Edit</button>
 						<button class='btn btn-danger button-delete' type='button' data-id='$id' onclick='deleteQuote($id)'>Delete</button>
 					</div>
-				</div>	
+				</div>
 			</div>
 		</div>
 	</div>
@@ -233,7 +236,7 @@
 			<button class='btn btn-primary button-view' type='button' data-id='$id' onclick='showSingleQuote($id)'>View</button>
 			<button class='btn btn-danger button-delete' type='button' data-id='$id' onclick='deleteQuote($id)'>Delete</button>
 		</div>
-	</div>	
+	</div>
 </div>
 
 </div>

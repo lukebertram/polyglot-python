@@ -23,6 +23,21 @@ class QuoteList(Resource):
                         mimetype='application/json')
         return resp
 
+    def post(self):
+        args = parser.parse_args()
+        if not (args['content'] and args['author']):
+            return 'Missing data', 400
+
+        quotes = mongo.db.quotes.find().sort("index", -1).limit(1)
+        args["index"] = int(quotes[0]["index"]) + 1
+
+        try:
+            mongo.db.quotes.insert(args)
+        except Error as ve:
+            abort(400, str(ve))
+        resp_obj = {'index': args["index"]}
+        return resp_obj, 201
+
 class Quote(Resource):
     def get(self, quote_id):
         quote_query = quote_id
@@ -35,6 +50,40 @@ class Quote(Resource):
                         mimetype='application/json')
         return resp
 
+    def put(self, quote_id):
+        args = parser.parse_args()
+        if not (args['content'] or args['author']):
+            return 'Missing data', 400
+
+        existing_quote = mongo.db.quotes.find_one({"index": int(quote_id)})
+        args["content"] = args["content"] if args["content"] else existing_quote["content"]
+        args["author"] = args["author"] if args["author"] else existing_quote["author"]
+
+        try:
+            mongo.db.quotes.update({
+                "index": int(quote_id)
+            }, {
+                '$set': {
+                    "content": args["content"],
+                    "author": args["author"]
+                }
+            }, upsert=True)
+        except Exception as ve:
+            abort(400, str(ve))
+        resp_obj = {'index': int(quote_id)}
+        return resp_obj, 201
+
+    def delete(self, quote_id):
+
+        try:
+            mongo.db.quotes.remove({
+                "index": int(quote_id)
+            })
+        except Exception as ve:
+            print (ve)
+            abort(400, str(ve))
+        return '', 204
+
 @app.route('/')
 def hello_world():
     return 'Hello from Flask!'
@@ -43,7 +92,7 @@ def hello_world():
 @app.route('/demo/')
 def serve_page():
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-    STATIC_ROOT = os.path.join(APP_ROOT, "..", "..","..","static")
+    STATIC_ROOT = os.path.join(APP_ROOT, "static")
     return send_from_directory(STATIC_ROOT, "index.html")
 
 
